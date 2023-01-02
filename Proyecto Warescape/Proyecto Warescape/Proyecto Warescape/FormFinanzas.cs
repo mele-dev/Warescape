@@ -14,7 +14,7 @@ namespace Proyecto_Warescape
 {
     public partial class FormFinanzas : Form
     {
-        MySqlConnection con = new MySqlConnection("Server=localhost; Database=warescapesrl; Uid=Admin; Pwd=warescape;");
+        MySqlConnection con = new MySqlConnection("Server=localhost; Database=warescapesrl; Uid=root; Pwd=;");
 
 
         public FormFinanzas()
@@ -47,35 +47,8 @@ namespace Proyecto_Warescape
         {
             actualizar_ventas();
             dgv_lista.ReadOnly = true;
-            MySqlCommand comando_marketing = new MySqlCommand("SELECT nombre,id_publicidad from publicidad", con);
-            con.Open();
-            MySqlDataReader registro_marketing = comando_marketing.ExecuteReader();
-            while (registro_marketing.Read())
-            {
-             string nombre = registro_marketing["nombre"].ToString();
-                string id_de_publicidad = registro_marketing["id_publicidad"].ToString();
-                cmb_publicidad.Items.Add(nombre + "-" + id_de_publicidad);
-
-
-            }
-            con.Close();
-
-
-            MySqlCommand comando = new MySqlCommand("SELECT nombre,id_libro from libros", con);
-            con.Open();
-            MySqlDataReader registro = comando.ExecuteReader();
-            while (registro.Read())
-            {
-              string nombre =registro["nombre"].ToString();
-                string id_libro = registro["id_libro"].ToString();
-                cmb_libros.Items.Add(nombre + "-" + id_libro);
-                
-
-
-
-            }
-            con.Close();
-
+            obtenerMarketing(con);
+            cargarLibrosFinanzas();
         }
 
         private void button5_Click(object sender, EventArgs e)
@@ -349,14 +322,27 @@ namespace Proyecto_Warescape
         }
         public void actualizar_ventas()
         {
-            string Mostrar_ventas = "select v.n_de_boleta 'N de boleta         ', v.fecha_de_venta 'Fecha', v.monto 'Monto', g.precio 'Precio', g.cantidad_vendida 'Cantidad comprada', l.nombre 'Nombre' from ventas v join generan g on v.n_de_boleta=g.n_de_boleta join libros l on l.id_libro=g.id_libro;";
-            MySqlCommand mostrar = new MySqlCommand(Mostrar_ventas, con);
-            MySqlDataAdapter adaptador = new MySqlDataAdapter();
-            adaptador.SelectCommand = mostrar;
-            DataTable tabla = new DataTable();
-            adaptador.Fill(tabla);
-            dgv_ventas.DataSource = tabla;
-            con.Close();
+            try
+            {
+                con.Open();
+                MySqlCommand query_mostrar_ventas = new MySqlCommand("select v.n_de_boleta 'N de boleta         ', v.fecha_de_venta 'Fecha', v.monto 'Monto', g.precio 'Precio', g.cantidad_vendida 'Cantidad comprada', l.nombre 'Nombre' from ventas v join generan g on v.n_de_boleta=g.n_de_boleta join libros l on l.id_libro=g.id_libro;", con);
+                MySqlDataReader reader_mostrar_ventas = query_mostrar_ventas.ExecuteReader();
+                while (reader_mostrar_ventas.Read())
+                {
+                    MySqlDataAdapter adaptador = new MySqlDataAdapter();
+                    adaptador.SelectCommand = query_mostrar_ventas;
+                    DataTable tabla = new DataTable();
+                    adaptador.Fill(tabla);
+                    dgv_ventas.DataSource = tabla;
+                }
+                con.Close();
+            }
+            catch (Exception ex)
+            {
+                con.Close();
+                MessageBox.Show("Error actualizar_ventas = " + ex.Message);
+                throw;
+            }
         }
 
         private void Borrar_Click(object sender, EventArgs e)
@@ -432,6 +418,52 @@ namespace Proyecto_Warescape
         private void fecha_venta_KeyPress(object sender, KeyPressEventArgs e)
         {
             e.Handled = true;
+        }
+
+        public void obtenerMarketing(MySqlConnection con)
+        {
+            try
+            {
+                con.Open();
+                MySqlCommand obtener_marketing = new MySqlCommand("SELECT nombre,id_publicidad from publicidad", con);
+                MySqlDataReader registro_marketing = obtener_marketing.ExecuteReader();
+                while (registro_marketing.Read())
+                {
+                    string nombre = registro_marketing["nombre"].ToString();
+                    string id_de_publicidad = registro_marketing["id_publicidad"].ToString();
+                    cmb_publicidad.Items.Add(nombre + "-" + id_de_publicidad);
+                }
+                con.Close();
+            }
+            catch (Exception ex)
+            {
+                con.Close();
+                MessageBox.Show("Error obtenerMarketing = " + ex.Message);
+                throw;
+            }
+        }
+
+        public void cargarLibrosFinanzas()
+        {
+            try
+            {
+                MySqlCommand query = new MySqlCommand("SELECT nombre,id_libro from libros", con);
+                con.Open();
+                MySqlDataReader reader = query.ExecuteReader();
+                while (reader.Read())
+                {
+                    string nombre = reader["nombre"].ToString();
+                    string id_libro = reader["id_libro"].ToString();
+                    cmb_libros.Items.Add(nombre + "-" + id_libro);
+                }
+                con.Close();
+            }
+            catch (Exception ex)
+            {
+                con.Close();
+                MessageBox.Show("Error cargarLibrosFinanzas = " + ex.Message);
+                throw;
+            }
         }
     }
     }

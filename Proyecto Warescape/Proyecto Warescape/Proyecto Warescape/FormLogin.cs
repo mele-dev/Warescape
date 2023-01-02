@@ -41,7 +41,6 @@ namespace Proyecto_Warescape
 
         private void btn_ingresar_Click(object sender, EventArgs e)
         {
-
             if (campo_usuario == null || campo_usuario.Equals(""))
             {
                 MessageBox.Show("Ingrese un nombre de usuario correcto");

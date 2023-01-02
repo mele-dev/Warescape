@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MySql.Data.MySqlClient;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -12,6 +13,8 @@ namespace Proyecto_Warescape
 {
     public partial class FormCarga : Form
     {
+        MySqlConnection con = new MySqlConnection("Server=localhost; Database=warescapesrl; Uid=root; Pwd=;");
+
         public FormCarga()
         {
             InitializeComponent();
@@ -39,7 +42,21 @@ namespace Proyecto_Warescape
 
         private void carga_Load(object sender, EventArgs e)
         {
+            checkearBD(con);
             timer1.Start();
+        }
+
+        public void checkearBD(MySqlConnection con)
+        {
+            try
+            {
+                con.Open();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error al chequear base de datos! (CHECKEAR WAMP SERVER) = " + ex.Message);
+                throw;
+            }
         }
     }
 }
